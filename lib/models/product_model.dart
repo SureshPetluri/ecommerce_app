@@ -4,12 +4,24 @@ class Product {
   final String imageUrl;
   final String description;
   final double price;
+  final double rating;
+  final String? color;
+  final String? size;
+  final double discount;
   final List<Product> relatedProducts;
 
-
-  Product({this.id = "", required this.name, required this.imageUrl, required this.price,this.description = "",this.relatedProducts= const <Product>[] });
+  Product(
+      {this.id = "",
+      required this.name,
+      required this.imageUrl,
+      required this.price,
+       this.rating = 0.0,
+       this.color = "",
+       this.size = "",
+       this.discount = 0.0,
+      this.description = "",
+      this.relatedProducts = const <Product>[]});
 }
-
 
 class RelatedProduct {
   final String name;

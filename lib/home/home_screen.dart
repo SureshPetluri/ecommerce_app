@@ -3,20 +3,22 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
 import '../models/product_model.dart';
-import '../mycart/produt_details_screen.dart';
+import '../product_details/produt_details_screen.dart';
 import '../product/product_list_screen.dart';
+import '../utils/responsive_menu.dart';
 
 class AmazonHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('E-Commerce'),
+    return ResponsiveMenu(
+      title: 'E-Commerce',
+      /*appBar: AppBar(
+        title: Text(),
         actions: [
           IconButton(icon: Icon(Icons.search), onPressed: () {}),
           IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {}),
         ],
-      ),
+      ),*/
       body: OrientationBuilder(
         builder: (context, orientation) {
           final isWeb = MediaQuery.of(context).size.width > 600;

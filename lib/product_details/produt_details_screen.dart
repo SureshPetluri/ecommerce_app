@@ -4,40 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../models/product_model.dart';
 import '../repository/product.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'E-commerce App',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
-      home: ProductDetailsPage(
-        product: Product(
-            name: "Sample Product",
-            price: 29.99,
-            description:
-                "This is a sample product description. It has many features and is very useful.",
-            imageUrl: 'https://picsum.photos/500/300?random=1',
-            relatedProducts: List.generate(
-              20,
-              (index) => Product(
-                name: "Related Product $index",
-                price: 19.99,
-                description: "Description for related product $index",
-                imageUrl: 'https://picsum.photos/500/300?random=$index',
-              ),
-            )),
-      ),
-    );
-  }
-}
+import '../utils/responsive_menu.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final Product product;
@@ -49,40 +16,8 @@ class ProductDetailsPage extends StatelessWidget {
     // Determine whether the screen is wide enough for a side-by-side layout
     bool isWideScreen = MediaQuery.of(context).size.width > 800;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(product.name),
-        actions: [
-          Consumer<ProductProvider>(
-            builder: (context, provider, child) {
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart),
-                    onPressed: () {
-                      // Navigate to cart page (not implemented)
-                    },
-                  ),
-                  if (provider.cart.isNotEmpty)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.red,
-                        child: Text(
-                          provider.cart.length.toString(),
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
+    return ResponsiveMenu(
+     title: product.name,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +29,7 @@ class ProductDetailsPage extends StatelessWidget {
                       // Product Details
                       Expanded(
                         flex: 3,
-                        child: buildProductDetailsleftWidget(),
+                        child: buildProductDetailsLeftWidget(),
                       ),
                       // Related Products
                       Expanded(
@@ -107,13 +42,13 @@ class ProductDetailsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Product Image
-                      buildProductDetailsleftWidget(),
+                      buildProductDetailsLeftWidget(),
                       buildProductDetailsRightWidget(context),
                       // Related Products
                     ],
                   ),
-            buildproductShowColumn('Related Products'),
-            buildproductShowColumn('Related Products With Free Delivery'),
+            buildRelatedProduct('Related Products'),
+            buildRelatedProduct('Related Products With Free Delivery'),
           ],
         ),
       ),
@@ -150,16 +85,18 @@ class ProductDetailsPage extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
+                Provider.of<ProductProvider>(context, listen: false)
+                    .addToCart(product);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('${product.name} added to cart!')),
                 );
               },
-              child: Text('Add to Cart'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 padding: EdgeInsets.symmetric(vertical: 14),
                 textStyle: TextStyle(fontSize: 20),
               ),
+              child: Text('Add to Cart'),
             ),
           ),
         ],
@@ -167,7 +104,7 @@ class ProductDetailsPage extends StatelessWidget {
     );
   }
 
-  Padding buildProductDetailsleftWidget() {
+  Padding buildProductDetailsLeftWidget() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -181,37 +118,35 @@ class ProductDetailsPage extends StatelessWidget {
               imageUrl: product.imageUrl,
               placeholder: (context, url) =>
                   const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+              errorWidget: (context, _, error) => const Icon(Icons.error),
               fit: BoxFit.contain,
             ),
           ),
 
-          Center(
-            child: Container(
-              alignment: Alignment.center,
-              height: 80,
-              width: double.infinity,
-              child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 8,
-                  // shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.all(10.0),
-                      height: 50,
-                      width: 50,
-                      color: Colors.green,
-                    );
-                  }),
-            ),
+          Container(
+            alignment: Alignment.center,
+            height: 80,
+            width: double.infinity,
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 8,
+                // shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Container(
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.all(10.0),
+                    height: 50,
+                    width: 50,
+                    color: Colors.green,
+                  );
+                }),
           )
         ],
       ),
     );
   }
 
-  Column buildproductShowColumn(String header) {
+  Column buildRelatedProduct(String header) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

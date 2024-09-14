@@ -2,51 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/product_model.dart';
-import '../mycart/produt_details_screen.dart';
+import '../product_details/produt_details_screen.dart';
 import '../repository/product.dart';
+import '../utils/responsive_menu.dart';
 
 class CategoryProductShowScreen extends StatelessWidget {
   const CategoryProductShowScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('E-Commerce Store'),
-          actions: [
-            Consumer<ProductProvider>(
-              builder: (context, provider, child) {
-                return Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.shopping_cart),
-                      onPressed: () {
-                        // Navigate to cart page (not implemented)
-                      },
-                    ),
-                    if (provider.cart.isNotEmpty)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.red,
-                          child: Text(
-                            provider.cart.length.toString(),
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+    return ResponsiveMenu(
+      title: 'E-Commerce Store',
         body: OrientationBuilder(
           builder: (context, orientation) {
-            final isMobile = orientation == Orientation.portrait;
             final productProvider = Provider.of<ProductProvider>(context);
             final products = productProvider.products;
 
@@ -78,7 +46,7 @@ class CategoryProductShowScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ProductDetailsPage(
-                                    product: Product(
+                                    product: product /*Product(
                                         name: "Sample Product",
                                         price: 29.99,
                                         description:
@@ -95,12 +63,11 @@ class CategoryProductShowScreen extends StatelessWidget {
                                             imageUrl:
                                                 'https://picsum.photos/500/300?random=$index',
                                           ),
-                                        )),
+                                        )),*/
                                   ),
                                 ));
                           },
-                          child: AbsorbPointer(
-                              child: ProductItem(product: product))),
+                          child: ProductItem(product: product)),
                     );
                   },
                 );
