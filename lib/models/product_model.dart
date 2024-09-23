@@ -4,16 +4,18 @@ class Product {
   final String imageUrl;
   final String description;
   final double price;
+  final double dealPrice;
   final double rating;
   final String? color;
   final String? size;
   final double discount;
-  final List<Product> relatedProducts;
+   List<Product> relatedProducts;
 
   Product(
       {this.id = "",
       required this.name,
       required this.imageUrl,
+      required this.dealPrice,
       required this.price,
        this.rating = 0.0,
        this.color = "",
@@ -26,6 +28,7 @@ class Product {
 class RelatedProduct {
   final String name;
   final double price;
+  final double dealPrice;
   final String description;
   final String imageUrl;
   final List<RelatedProduct> relatedProducts;
@@ -33,6 +36,7 @@ class RelatedProduct {
   RelatedProduct({
     required this.name,
     required this.price,
+    required this.dealPrice,
     required this.description,
     required this.imageUrl,
     this.relatedProducts = const [],

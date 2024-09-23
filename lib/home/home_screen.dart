@@ -1,13 +1,62 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
+import '../data/providers/provider_handler.dart';
 import '../models/product_model.dart';
-import '../product_details/produt_details_screen.dart';
 import '../product/product_list_screen.dart';
+import '../product_details/produt_details_screen.dart';
 import '../utils/responsive_menu.dart';
+import '../widgets/carousel_widget.dart';
+import '../widgets/categories_widget.dart';
+import '../widgets/product_show_list_grid.dart';
 
-class AmazonHomePage extends StatelessWidget {
+class AmazonHomePage extends StatefulWidget {
+  AmazonHomePage({super.key});
+
+  @override
+  State<AmazonHomePage> createState() => _AmazonHomePageState();
+}
+
+class _AmazonHomePageState extends State<AmazonHomePage> {
+  List<Product> popularProducts = [];
+
+  List<Product> computerProducts = [];
+
+  List<Product> groceriesProducts = [];
+
+  List<Product> kidsProducts = [];
+  int currentIndex = 0;
+  List<Product> totalItems = [];
+  final ApiService _apiService = ApiService();
+
+  @override
+  void initState() {
+    getData();
+    totalItems = List.generate(
+      8,
+      (index) => Product(
+        name: "Related Product $index",
+        price: 19.99,
+        dealPrice: 19.99,
+        description: "Description for related product $index",
+        imageUrl: 'https://picsum.photos/500/300?random=$index',
+      ),
+    );
+    super.initState();
+  }
+
+  getData() async {
+    var returnMap =
+        await _apiService.requestApi(RequestMethod.post, '/register', body: {
+      "userName": "Suresh1",
+      "email": "Suresh@gmail.com1",
+      "mobileNumber": "88011157871",
+      "password": "Suresh1"
+    });
+    print("returnMap....$returnMap");
+  }
+
   @override
   Widget build(BuildContext context) {
     return ResponsiveMenu(
@@ -26,27 +75,44 @@ class AmazonHomePage extends StatelessWidget {
           return ListView(
             children: [
               // Carousel Section
-              _buildCarousel(),
+              const CarouselWidget(listOfItems: [
+                'https://picsum.photos/500/300?random=1',
+                'https://picsum.photos/500/300?random=2',
+                'https://picsum.photos/500/300?random=3',
+              ]),
 
               // Categories Section
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text(
                   "Categories",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
-              _buildCategorySection(),
+              const CategoriesWidget(
+                routeWidget: CategoryProductShowScreen(),
+              ),
 
               // Product Grid
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Text(
                   "Popular Products",
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
-              _buildProductGrid(isWeb: isWeb),
+              _buildProductGrid(totalItems, isShowRows: "fillRow"),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Best Electronics",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              _buildProductGrid(totalItems, isShowRows: "onlyTwo"),
+              SizedBox(
+                height: 50,
+              ),
             ],
           );
         },
@@ -54,197 +120,66 @@ class AmazonHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildCarousel() {
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 200,
-        autoPlay: true,
-        viewportFraction: 1,
-        enlargeCenterPage: false,
-      ),
-      items: [
-        'https://picsum.photos/500/300?random=1',
-        'https://picsum.photos/500/300?random=1',
-        'https://picsum.photos/500/300?random=1',
-      ].map((url) {
-        return Builder(
-          builder: (BuildContext context) {
-            return CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.cover,
-              width: MediaQuery.of(context).size.width,
-            );
-          },
-        );
-      }).toList(),
-    );
-  }
+  Widget _buildProductGrid(List<Product> listOfItems,
+      {required String isShowRows}) {
+    return OrientationBuilder(builder: (context, orientation) {
+      return LayoutBuilder(builder: (context, constraints) {
+        const itemWidth = 180.0;
+        final numColumns = (constraints.maxWidth / itemWidth).floor();
+        // Calculate the number of full rows that can be displayed
+        final int itemCountToShow;
+        if (isShowRows == "fillRow") {
+          itemCountToShow = (listOfItems.length >= numColumns)
+              ? (listOfItems.length ~/ numColumns) * numColumns
+              : listOfItems.length;
+        } else if (isShowRows == "onlyTwo") {
+          const int maxRows = 2;
+          // itemCountToShow = min(maxRows * numColumns, totalItems.length);
+          final int itemsForTwoRows =
+              min(maxRows * numColumns, listOfItems.length);
 
-  Widget _buildCategorySection() {
-    return SizedBox(
-      height: 100,
-      child: ListView.builder(
+          itemCountToShow = (itemsForTwoRows < numColumns)
+              ? listOfItems.length
+              : itemsForTwoRows;
+        } else {
+          itemCountToShow = listOfItems.length;
+        }
+        return GridView.builder(
           shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
-          itemCount: 8,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: itemCountToShow,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: numColumns,
+            crossAxisSpacing: 10.0,
+            mainAxisSpacing: 10.0,
+            childAspectRatio: itemWidth / 190.0, // Fixed item width and height
+          ),
           itemBuilder: (context, index) {
+            listOfItems[index].relatedProducts = List.generate(
+              20,
+              (index) => Product(
+                name: "Related Product $index",
+                price: 19.99,
+                dealPrice: 19.99,
+                description: "Description for related product $index",
+                imageUrl: 'https://picsum.photos/500/300?random=$index',
+              ),
+            );
             return InkWell(
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const CategoryProductShowScreen()));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProductDetailsPage(product: listOfItems[index]),
+                  ),
+                );
               },
-              child: AbsorbPointer(
-                child: _buildCategoryCard(
-                  'Electronics',
-                  'https://picsum.photos/500/300?random=$index',
-                ),
-              ),
+              child: ProductItem(product: totalItems[index]),
             );
-
-            /*ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildCategoryCard('Fashion',  'https://picsum.photos/500/300?random=2',),
-              _buildCategoryCard('Home Decor',  'https://picsum.photos/500/300?random=3',),
-              _buildCategoryCard('Work Tools',  'https://picsum.photos/500/300?random=4',),
-              _buildCategoryCard('Groceries',  'https://picsum.photos/500/300?random=5',),
-            ],
-          );*/
-          }),
-    );
-  }
-
-  Widget _buildCategoryCard(String title, String imageUrl) {
-    return Container(
-      width: 80,
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        children: [
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            height: 60,
-            width: 60,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(height: 5),
-          Text(title, style: TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductGrid({required bool isWeb}) {
-    return OrientationBuilder(builder: (context, orientation) {
-      return LayoutBuilder(builder: (context, constraints) {
-        const itemWidth = 220.0;
-        final numColumns = (constraints.maxWidth / itemWidth).floor();
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: 10,
-          // Example product count
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: numColumns,
-            // Set the number of columns dynamically
-            crossAxisSpacing: 10.0,
-            mainAxisSpacing: 10.0,
-            childAspectRatio: itemWidth / 230.0, // Fixed item width and height
-          ),
-          itemBuilder: (context, index) {
-            return InkWell(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProductDetailsPage(
-                          product: Product(
-                              name: "Sample Product",
-                              price: 29.99,
-                              description:
-                                  "This is a sample product description. It has many features and is very useful.",
-                              imageUrl:
-                                  'https://picsum.photos/500/300?random=1',
-                              relatedProducts: List.generate(
-                                20,
-                                (index) => Product(
-                                  name: "Related Product $index",
-                                  price: 19.99,
-                                  description:
-                                      "Description for related product $index",
-                                  imageUrl:
-                                      'https://picsum.photos/500/300?random=$index',
-                                ),
-                              )),
-                        ),
-                      ));
-                },
-                child: AbsorbPointer(child: _buildProductCard(index)));
           },
         );
       });
     });
   }
-
-  Widget _buildProductCard(int index) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8.0),
-                  topRight: Radius.circular(8.0)),
-              child: Image.network(
-                'https://picsum.photos/500/300?random=$index',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Text('Product Name', style: TextStyle(fontSize: 16)),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: ListTile(
-                    minLeadingWidth: 0.0,
-                    minTileHeight: 40,
-                    contentPadding: EdgeInsets.zero,
-                    minVerticalPadding: 0.0,
-                    horizontalTitleGap: 0.0,
-                    title: Text(
-                      '\$49.99',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    subtitle: Text(
-                      '\$99.99',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: AmazonHomePage(),
-  ));
 }

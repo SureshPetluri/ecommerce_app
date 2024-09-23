@@ -8,11 +8,12 @@ class ProductProvider with ChangeNotifier {
   ProductProvider() {
     _products = List.generate(
       20,
-          (index) => Product(
+      (index) => Product(
           id: '$index',
           name: 'Product $index',
           imageUrl: getImageURL(index),
-          price: 29.99),
+          price: 29.99,
+          dealPrice: 29.99),
     );
   }
 

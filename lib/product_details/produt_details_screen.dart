@@ -5,19 +5,25 @@ import 'package:provider/provider.dart';
 import '../models/product_model.dart';
 import '../repository/product.dart';
 import '../utils/responsive_menu.dart';
+import '../widgets/product_show_list_grid.dart';
 
-class ProductDetailsPage extends StatelessWidget {
-  final Product product;
+class ProductDetailsPage extends StatefulWidget {
+  Product product;
 
-  const ProductDetailsPage({super.key, required this.product});
+  ProductDetailsPage({super.key, required this.product});
 
+  @override
+  State<ProductDetailsPage> createState() => _ProductDetailsPageState();
+}
+
+class _ProductDetailsPageState extends State<ProductDetailsPage> {
   @override
   Widget build(BuildContext context) {
     // Determine whether the screen is wide enough for a side-by-side layout
     bool isWideScreen = MediaQuery.of(context).size.width > 800;
 
     return ResponsiveMenu(
-     title: product.name,
+      title: widget.product.name,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,42 +67,43 @@ class ProductDetailsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           // Product Name
           Text(
-            product.name,
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            widget.product.name,
+            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           // Product Price
           Text(
-            '\$${product.price.toStringAsFixed(2)}',
-            style: TextStyle(fontSize: 24, color: Colors.green),
+            '\$${widget.product.price.toStringAsFixed(2)}',
+            style: const TextStyle(fontSize: 24, color: Colors.green),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           // Product Description
           Text(
-            product.description,
+            widget.product.description,
             style: TextStyle(fontSize: 18),
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           // Add to Cart Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 Provider.of<ProductProvider>(context, listen: false)
-                    .addToCart(product);
+                    .addToCart(widget.product);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${product.name} added to cart!')),
+                  SnackBar(
+                      content: Text('${widget.product.name} added to cart!')),
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
-                padding: EdgeInsets.symmetric(vertical: 14),
-                textStyle: TextStyle(fontSize: 20),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                textStyle: const TextStyle(fontSize: 20),
               ),
-              child: Text('Add to Cart'),
+              child: const Text('Add to Cart'),
             ),
           ),
         ],
@@ -115,7 +122,7 @@ class ProductDetailsPage extends StatelessWidget {
             width: double.infinity,
             // height: 400,
             child: CachedNetworkImage(
-              imageUrl: product.imageUrl,
+              imageUrl: widget.product.imageUrl,
               placeholder: (context, url) =>
                   const Center(child: CircularProgressIndicator()),
               errorWidget: (context, _, error) => const Icon(Icons.error),
@@ -125,12 +132,11 @@ class ProductDetailsPage extends StatelessWidget {
 
           Container(
             alignment: Alignment.center,
-            height: 80,
+            height: 100,
             width: double.infinity,
             child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 8,
-                // shrinkWrap: true,
                 itemBuilder: (context, index) {
                   return Container(
                     alignment: Alignment.center,
@@ -150,49 +156,45 @@ class ProductDetailsPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(),
+        const Divider(),
         Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Text(
             header,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
-          height: 200,
+          height: 170,
           child: ListView.builder(
+            shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-            itemCount: product.relatedProducts.length,
+            itemCount: widget.product.relatedProducts.length,
             itemBuilder: (context, index) {
-              final relatedProduct = product.relatedProducts[index];
-              return Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: relatedProduct.imageUrl,
-                      placeholder: (context, url) =>
-                          Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                      height: 150,
-                      width: 120,
-                      fit: BoxFit.cover,
+              final relatedProduct = widget.product.relatedProducts[index];
+              return SizedBox(
+                  width: 170,
+                  child: Flexible(
+                    child: InkWell(
+                      onTap: () {
+                        widget.product = relatedProduct;
+                        widget.product.relatedProducts = List.generate(
+                          20,
+                              (index) => Product(
+                            name: "Related Product $index",
+                            price: 19.99,
+                            dealPrice: 19.99,
+                            description: "Description for related product $index",
+                            imageUrl: 'https://picsum.photos/500/300?random=$index',
+                          ),
+                        );
+                        setState(() {});
+                      },
+                      child: ProductItem(
+                        product: relatedProduct,
+                      ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      relatedProduct.name,
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '\$${relatedProduct.price.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 12, color: Colors.green),
-                    ),
-                  ],
-                ),
-              );
+                  ));
             },
           ),
         ),
