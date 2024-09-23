@@ -92,7 +92,7 @@ class ResponsiveMenu extends StatelessWidget {
                           Expanded(
                             flex: 2,
                             child: Container(
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(20.0),
                                     bottomLeft: Radius.circular(20.0)),
