@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/product_model.dart';
 import '../product_details/produt_details_screen.dart';
 import '../repository/product.dart';
 import '../utils/responsive_menu.dart';
@@ -26,6 +25,7 @@ class CategoryProductShowScreen extends StatelessWidget {
                 final numColumns = (constraints.maxWidth / itemWidth).floor();
 
                 return GridView.builder(
+                  shrinkWrap: true,
                   padding: const EdgeInsets.all(10.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: numColumns,

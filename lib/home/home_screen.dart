@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../data/models/product_model.dart';
 import '../data/providers/provider_handler.dart';
-import '../models/product_model.dart';
 import '../product/product_list_screen.dart';
 import '../product_details/produt_details_screen.dart';
 import '../utils/responsive_menu.dart';
@@ -47,13 +48,10 @@ class _AmazonHomePageState extends State<AmazonHomePage> {
   }
 
   getData() async {
-    var returnMap =
-        await _apiService.requestApi(RequestMethod.post, '/register', body: {
-      "userName": "Suresh1",
-      "email": "Suresh@gmail.com1",
-      "mobileNumber": "88011157871",
-      "password": "Suresh1"
-    });
+    var returnMap = await _apiService.requestApi(
+      RequestMethod.get,
+      '/products',
+    );
     print("returnMap....$returnMap");
   }
 
@@ -68,82 +66,75 @@ class _AmazonHomePageState extends State<AmazonHomePage> {
           IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {}),
         ],
       ),*/
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          final isWeb = MediaQuery.of(context).size.width > 600;
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Carousel Section
+          const CarouselWidget(listOfItems: [
+            'https://picsum.photos/500/300?random=1',
+            'https://picsum.photos/500/300?random=2',
+            'https://picsum.photos/500/300?random=3',
+          ]),
 
-          return ListView(
-            children: [
-              // Carousel Section
-              const CarouselWidget(listOfItems: [
-                'https://picsum.photos/500/300?random=1',
-                'https://picsum.photos/500/300?random=2',
-                'https://picsum.photos/500/300?random=3',
-              ]),
+          // Categories Section
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Categories",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const CategoriesWidget(
+            routeWidget: CategoryProductShowScreen(),
+          ),
 
-              // Categories Section
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Categories",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const CategoriesWidget(
-                routeWidget: CategoryProductShowScreen(),
-              ),
-
-              // Product Grid
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Popular Products",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              _buildProductGrid(totalItems, isShowRows: "fillRow"),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Best Electronics",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ),
-              _buildProductGrid(totalItems, isShowRows: "onlyTwo"),
-              SizedBox(
-                height: 50,
-              ),
-            ],
-          );
-        },
+          // Product Grid
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Popular Products",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          _buildProductGrid(totalItems, isShowRows: "fillRow"),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Best Electronics",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          _buildProductGrid(totalItems, isShowRows: "onlyTwo"),
+          SizedBox(
+            height: 50,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProductGrid(List<Product> listOfItems,
-      {required String isShowRows}) {
+  Widget _buildProductGrid(List<Product> listOfItems, {required String isShowRows}) {
     return OrientationBuilder(builder: (context, orientation) {
       return LayoutBuilder(builder: (context, constraints) {
         const itemWidth = 180.0;
         final numColumns = (constraints.maxWidth / itemWidth).floor();
-        // Calculate the number of full rows that can be displayed
         final int itemCountToShow;
+
         if (isShowRows == "fillRow") {
           itemCountToShow = (listOfItems.length >= numColumns)
               ? (listOfItems.length ~/ numColumns) * numColumns
               : listOfItems.length;
         } else if (isShowRows == "onlyTwo") {
           const int maxRows = 2;
-          // itemCountToShow = min(maxRows * numColumns, totalItems.length);
           final int itemsForTwoRows =
-              min(maxRows * numColumns, listOfItems.length);
-
+          min(maxRows * numColumns, listOfItems.length);
           itemCountToShow = (itemsForTwoRows < numColumns)
               ? listOfItems.length
               : itemsForTwoRows;
         } else {
           itemCountToShow = listOfItems.length;
         }
+
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -152,12 +143,12 @@ class _AmazonHomePageState extends State<AmazonHomePage> {
             crossAxisCount: numColumns,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
-            childAspectRatio: itemWidth / 190.0, // Fixed item width and height
+            childAspectRatio: itemWidth / 190.0,
           ),
           itemBuilder: (context, index) {
             listOfItems[index].relatedProducts = List.generate(
               20,
-              (index) => Product(
+                  (index) => Product(
                 name: "Related Product $index",
                 price: 19.99,
                 dealPrice: 19.99,
@@ -165,21 +156,26 @@ class _AmazonHomePageState extends State<AmazonHomePage> {
                 imageUrl: 'https://picsum.photos/500/300?random=$index',
               ),
             );
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ProductDetailsPage(product: listOfItems[index]),
-                  ),
-                );
-              },
-              child: ProductItem(product: totalItems[index]),
+
+            return AnimatedOpacity(
+              duration: Duration(milliseconds: 500),
+              opacity: 1.0, // You can change this to animate visibility based on condition
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailsPage(product: listOfItems[index]),
+                    ),
+                  );
+                },
+                child: ProductItem(product: totalItems[index]),
+              ),
             );
           },
         );
       });
     });
   }
+
 }

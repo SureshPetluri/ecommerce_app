@@ -1,7 +1,8 @@
+import 'package:ecommerce_app/utils/responsive_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../repository/product.dart';
 
 class CartScreen extends StatelessWidget {
@@ -10,19 +11,38 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductProvider>(builder: (context, controller, _) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Cart'),
-        ),
-        body: ListView.builder(
-          itemCount: controller.cart.length,
-          itemBuilder: (context, index) {
-            final item = controller.cart[index];
-            return CartItemWidget(
-              item: item,
-              controller: controller,
-            );
-          },
+      return ResponsiveMenu(
+        title: 'Cart',
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Wrap(
+            children: [
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width > 800
+                    ? MediaQuery.sizeOf(context).width * .58
+                    : null,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: controller.cart.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.cart[index];
+                    return CartItemWidget(
+                      item: item,
+                      controller: controller,
+                    );
+                  },
+                ),
+              ),
+              Container(
+                height: 500,
+                color: Colors.green,
+                width: MediaQuery.sizeOf(context).width > 800
+                    ? MediaQuery.sizeOf(context).width * .4
+                    : null,
+              )
+            ],
+          ),
         ),
       );
     });
@@ -67,7 +87,6 @@ class CartItemWidget extends StatelessWidget {
                     },
                   ),
                 ),
-
                 SizedBox(width: 16.0),
                 Expanded(
                   child: Column(

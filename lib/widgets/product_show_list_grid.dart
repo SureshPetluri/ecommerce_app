@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../repository/product.dart';
 
 class ProductItem extends StatelessWidget {
@@ -49,8 +49,8 @@ class ProductItem extends StatelessWidget {
                 Column(
                   children: [
                     Text(
-                      '\$${product.price.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      '\$${product.dealPrice.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF2196F3)),
                     ),
                     Text(
                       '\$${product.price.toStringAsFixed(2)}',
@@ -66,15 +66,32 @@ class ProductItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: List.generate(
-                          5,
-                              (index) => const Icon(
+                      mainAxisSize: MainAxisSize.max,
+                      children: List.generate(5, (index) {
+                        if (index < 3.5.floor()) {
+                          // Full stars
+                          return const Icon(
                             Icons.star,
                             size: 12,
                             color: Color(0xFFEE6C55),
-                          ),
-                        )),
+                          );
+                        } else if (index < 3.5 && 3.5 - index >= 0.5) {
+                          // Half star
+                          return const Icon(
+                            Icons.star_half,
+                            size: 12,
+                            color: Color(0xFFEE6C55),
+                          );
+                        } else {
+                          // Empty stars
+                          return const Icon(
+                            Icons.star_border,
+                            size: 12,
+                            color: Color(0xFFEE6C55),
+                          );
+                        }
+                      }),
+                    ),
                     IconButton(
                         tooltip: 'Add to Cart',
                         onPressed: (){

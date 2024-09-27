@@ -117,22 +117,22 @@ import 'package:flutter/material.dart';
 class AppButton extends StatefulWidget {
   const AppButton(
       {super.key,
-       this.title = "",
-       this.child,
+      this.title = "",
+      this.child,
       this.titleColor = Colors.white,
-      this.titleFontSize = 20,
+      this.titleFontSize = 16,
       this.borderRadius = 10,
       this.fontFamily = "Raleway",
       this.titleFontWeight = FontWeight.w600,
       required this.onPressed,
       this.isTextBtn = false,
-      this.alignment = Alignment.center,
+      this.alignment,
       this.disableBtn = false,
-      this.height = 50});
+      this.height = 40});
 
   final String title;
   final Widget? child;
-  final Alignment alignment;
+  final Alignment? alignment;
   final String fontFamily;
   final bool isTextBtn;
 
@@ -184,7 +184,7 @@ class _AppButtonState extends State<AppButton> with TickerProviderStateMixin {
       ),
       child: Container(
         alignment: widget.alignment,
-        height: widget.height,
+        height: widget.isTextBtn ? null : widget.height,
         // constraints:
         //     const BoxConstraints(maxHeight: 40.0, minHeight: 0.0),
         decoration: widget.isTextBtn
@@ -222,18 +222,19 @@ class _AppButtonState extends State<AppButton> with TickerProviderStateMixin {
             shadowColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
           ),
-          child:widget.child ?? Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              widget.title,
-              style: TextStyle(
-                  color: widget.titleColor,
-                  fontSize: widget.titleFontSize,
-                  fontFamily: widget.fontFamily,
-                  fontWeight: widget.titleFontWeight),
-            ),
-          ),
+          child: widget.child ??
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: widget.isTextBtn ? 0.0 : 20.0),
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                      color: widget.titleColor,
+                      fontSize: widget.titleFontSize,
+                      fontFamily: widget.fontFamily,
+                      fontWeight: widget.titleFontWeight),
+                ),
+              ),
         ),
       ),
     );

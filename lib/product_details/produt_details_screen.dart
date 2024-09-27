@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/product_model.dart';
+import '../data/models/product_model.dart';
 import '../repository/product.dart';
 import '../utils/responsive_menu.dart';
 import '../widgets/product_show_list_grid.dart';
@@ -24,39 +24,37 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
     return ResponsiveMenu(
       title: widget.product.name,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            isWideScreen
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Product Details
-                      Expanded(
-                        flex: 3,
-                        child: buildProductDetailsLeftWidget(),
-                      ),
-                      // Related Products
-                      Expanded(
-                        flex: 2,
-                        child: buildProductDetailsRightWidget(context),
-                      ),
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Product Image
-                      buildProductDetailsLeftWidget(),
-                      buildProductDetailsRightWidget(context),
-                      // Related Products
-                    ],
-                  ),
-            buildRelatedProduct('Related Products'),
-            buildRelatedProduct('Related Products With Free Delivery'),
-          ],
-        ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          isWideScreen
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Details
+                    Expanded(
+                      flex: 3,
+                      child: buildProductDetailsLeftWidget(),
+                    ),
+                    // Related Products
+                    Expanded(
+                      flex: 2,
+                      child: buildProductDetailsRightWidget(context),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Image
+                    buildProductDetailsLeftWidget(),
+                    buildProductDetailsRightWidget(context),
+                    // Related Products
+                  ],
+                ),
+          buildRelatedProduct('Related Products'),
+          buildRelatedProduct('Related Products With Free Delivery'),
+        ],
       ),
     );
   }
@@ -174,25 +172,23 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               final relatedProduct = widget.product.relatedProducts[index];
               return SizedBox(
                   width: 170,
-                  child: Flexible(
-                    child: InkWell(
-                      onTap: () {
-                        widget.product = relatedProduct;
-                        widget.product.relatedProducts = List.generate(
-                          20,
-                              (index) => Product(
-                            name: "Related Product $index",
-                            price: 19.99,
-                            dealPrice: 19.99,
-                            description: "Description for related product $index",
-                            imageUrl: 'https://picsum.photos/500/300?random=$index',
-                          ),
-                        );
-                        setState(() {});
-                      },
-                      child: ProductItem(
-                        product: relatedProduct,
-                      ),
+                  child: InkWell(
+                    onTap: () {
+                      widget.product = relatedProduct;
+                      widget.product.relatedProducts = List.generate(
+                        20,
+                            (index) => Product(
+                          name: "Related Product $index",
+                          price: 19.99,
+                          dealPrice: 19.99,
+                          description: "Description for related product $index",
+                          imageUrl: 'https://picsum.photos/500/300?random=$index',
+                        ),
+                      );
+                      setState(() {});
+                    },
+                    child: ProductItem(
+                      product: relatedProduct,
                     ),
                   ));
             },
